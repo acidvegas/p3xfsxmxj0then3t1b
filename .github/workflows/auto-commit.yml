@@ -1,0 +1,32 @@
+name: Auto Commit
+
+on:
+  schedule:
+    # Runs every 5 minutes (maximum frequency allowed by GitHub)
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  auto-commit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Update timestamp in environment.json
+        run: |
+          # Add a timestamp to the file to make a change
+          echo "{ \"last_updated\": \"$(date -u +"%SZ")\" }" > cloud.json
+          
+      - name: Commit changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add environment.json
+          git commit -m "Add file" || echo "No changes to commit"
+          
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
