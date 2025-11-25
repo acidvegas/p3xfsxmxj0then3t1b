@@ -15,24 +15,23 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
         
       - name: Update cloud.json with seconds
         run: |
-          # Just write the current seconds to the file
           date +%s > cloud.json
+          cat cloud.json
+          ls -la
           
-      - name: Check if there are changes
-        id: check_changes
+      - name: Show git status
         run: |
-          git diff --quiet cloud.json || echo "changed=true" >> $GITHUB_OUTPUT
+          git status
+          git diff
           
-      - name: Commit and push if changed
-        if: steps.check_changes.outputs.changed == 'true'
+      - name: Commit and push
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add cloud.json
-          git commit -m "Add file"
-          git push
+          git add -A
+          git status
+          git commit -m "Add file" || true
+          git push origin main
